@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>JS Drum Kit</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="keys">
+      <div data-key="A" class="key">
+        <kbd>A</kbd>
+        <span class="sound">clap</span>
+      </div>
+      <div data-key="S" class="key">
+        <kbd>S</kbd>
+        <span class="sound">hihat</span>
+      </div>
+      <div data-key="D" class="key">
+        <kbd>D</kbd>
+        <span class="sound">kick</span>
+      </div>
+      <div data-key="F" class="key">
+        <kbd>F</kbd>
+        <span class="sound">openhat</span>
+      </div>
+      <div data-key="G" class="key">
+        <kbd>G</kbd>
+        <span class="sound">boom</span>
+      </div>
+      <div data-key="H" class="key">
+        <kbd>H</kbd>
+        <span class="sound">ride</span>
+      </div>
+      <div data-key="J" class="key">
+        <kbd>J</kbd>
+        <span class="sound">snare</span>
+      </div>
+      <div data-key="K" class="key">
+        <kbd>K</kbd>
+        <span class="sound">tom</span>
+      </div>
+      <div data-key="L" class="key">
+        <kbd>L</kbd>
+        <span class="sound">tink</span>
+      </div>
+      <div data-key="5" class="key">
+        <kbd>JS</kbd>
+        <span class="sound">JavaScript</span>
+      </div>
+    </div>
+
+    <audio data-key="A" src="sounds/clap.wav"></audio>
+    <audio data-key="S" src="sounds/hihat.wav"></audio>
+    <audio data-key="D" src="sounds/kick.wav"></audio>
+    <audio data-key="F" src="sounds/openhat.wav"></audio>
+    <audio data-key="G" src="sounds/boom.wav"></audio>
+    <audio data-key="H" src="sounds/ride.wav"></audio>
+    <audio data-key="J" src="sounds/snare.wav"></audio>
+    <audio data-key="K" src="sounds/tom.wav"></audio>
+    <audio data-key="L" src="sounds/tink.wav"></audio>
+    <audio data-key="5" src="sounds/5.mp3"></audio>
+
+    <script src="//unpkg.com/twitch-js@>2.0.0-beta.31"></script>
+
+    <script type="module">
+      import { config } from './config.js';
+      (function () {
+        // Provide your token, username and channel. You can generate a token
+        // here: https://twitchapps.com/tmi/
+        const token = config().OAUTH_TOKEN;
+        const username = config().BOT_USERNAME;
+
+        const channel = config().CHANNEL_NAME;
+
+        // Instantiate clients.
+        const { api, chat } = new TwitchJs({ token, username });
+
+        const handleMessage = (msg) => {
+          const notes = msg.message.substr(6);
+          const cmd = msg.message.substr(0, 5);
+          console.log(cmd, notes);
+
+          if (cmd === '!play') {
+            playSound(notes);
+          }
+        };
+
+        function removeTransition(e) {
+          if (e.propertyName !== 'transform') return;
+          e.target.classList.remove('playing');
+        }
+
+        function playSound(cmd) {
+          const audio = document.querySelector(`audio[data-key="${cmd}"]`);
+          const key = document.querySelector(`div[data-key="${cmd}"]`);
+          if (!audio) return;
+
+          key.classList.add('playing');
+          audio.currentTime = 0;
+          audio.play();
+        }
+
+        const keys = Array.from(document.querySelectorAll('.key'));
+        keys.forEach((key) =>
+          key.addEventListener('transitionend', removeTransition)
+        );
+
+        window.addEventListener('keydown', playSound);
+
+        // Listen for all events.
+        chat.on(TwitchJs.Chat.Events.ALL, handleMessage);
+
+        // Connect ...
+        chat.connect().then(() => {
+          // ... and then join the channel.
+          chat.join(channel);
+        });
+      })();
+    </script>
+  </body>
+</html>
