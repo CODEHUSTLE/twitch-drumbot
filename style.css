@@ -12,11 +12,9 @@ html {
 }
 
 .keys {
-  display: flex;
-  flex: 1;
-  min-height: 100vh;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: auto auto auto auto;
+  width: 552px;
 }
 
 .key {

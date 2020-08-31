@@ -7,6 +7,10 @@
   </head>
   <body>
     <div class="keys">
+      <div class="key">
+        <kbd id="bpmbox">&nbsp;</kbd>
+        <span class="sound">speed</span>
+      </div>
       <div data-key="A" class="key">
         <kbd>A</kbd>
         <span class="sound">clap</span>
@@ -45,9 +49,8 @@
       </div>
       <div data-key="5" class="key">
         <kbd>JS</kbd>
-        <span class="sound">JavaScript</span>
+        <span class="sound">&#x1F49F;</span>
       </div>
-      <div id="bpmbox"></div>
     </div>
 
     <audio data-key="A" src="sounds/clap.wav"></audio>
@@ -72,21 +75,18 @@
         const username = config().BOT_USERNAME;
 
         const channel = config().CHANNEL_NAME;
-
-        let bpm;
+        var bpm;
         setBPM(128);
-
         // Instantiate clients.
         const { api, chat } = new TwitchJs({ token, username });
 
         const handleMessage = (msg) => {
-          console.log(msg);
           if (!msg.message) {
             return;
           }
           if (msg.message.startsWith('!')) {
             if (msg.message.startsWith('!drum ')) {
-              const notes = msg.message.substr(6);
+              const notes = msg.message.substr(6).toUpperCase();
               addNotes(notes);
             }
             if (msg.message.startsWith('!bpm ')) {
@@ -102,7 +102,6 @@
           if (e.propertyName !== 'transform') return;
           e.target.classList.remove('playing');
         }
-
         function setBPM(targetBPM) {
           console.log(
             'current BPM: ' + bpm + '. Target :' + Math.floor(60000 / targetBPM)
@@ -110,8 +109,9 @@
           bpm = Math.floor(60000 / targetBPM);
           document.getElementById('bpmbox').innerHTML = targetBPM;
         }
-
         function playSound(cmd) {
+          console.log('playing notes: ' + cmd);
+
           const audio = document.querySelector(`audio[data-key="${cmd}"]`);
           const key = document.querySelector(`div[data-key="${cmd}"]`);
           if (!audio) return;
@@ -120,13 +120,12 @@
           audio.currentTime = 0;
           audio.play();
         }
-
-        function addNotes(notes) {
-          let noteBatches = notes.split(' ');
-          let thisNote;
-          let thisTimer;
-          for (let noteBatch in noteBatches) {
-            for (let i = 0; i < noteBatches[noteBatch].length; i++) {
+        function addNotes(noteString) {
+          var noteBatches = noteString.split(' ');
+          var thisNote;
+          var thisTimer;
+          for (var noteBatch in noteBatches) {
+            for (var i = 0; i < noteBatches[noteBatch].length; i++) {
               thisNote = noteBatches[noteBatch].charAt(i);
               thisTimer = bpm * noteBatch;
               console.log(thisNote);
@@ -134,7 +133,6 @@
             }
           }
         }
-
         const keys = Array.from(document.querySelectorAll('.key'));
         keys.forEach((key) =>
           key.addEventListener('transitionend', removeTransition)
